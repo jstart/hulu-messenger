@@ -82,10 +82,11 @@ function receivedMessage(event) {
     // If we receive a text message, check to see if it matches a keyword
     // and send back the template example. Otherwise, just echo the text we received.
     if (messageText.includes('popular') || messageText.includes('top') || messageText.includes('best')) {
-      hulu.callPopular(senderID, function() {
+      hulu.callPopular(senderID, function(results) {
         messenger.sendTextMessage(senderID, "Welcome to HuluBot! You can search for content on Hulu by saying show me Handmaids Tale or search for Seinfeld. Here are the most popular shows on Hulu.")
+        let elements = messenger.parseAsElements(results)
         messenger.sendGenericMessage(senderID, elements)
-      }
+      })
     } else if (messageText.includes("help") || messageText.includes("support") || messageText.includes("can you") || messageText.includes("how do")) {
       messenger.sendTextMessage(senderID, "You can say things like, search for Seinfeld, or tell me about The Handmaids Tale.")
     } else {
