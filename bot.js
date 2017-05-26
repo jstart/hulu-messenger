@@ -83,18 +83,23 @@ function receivedMessage(event) {
     // and send back the template example. Otherwise, just echo the text we received.
     if (messageText.includes('popular') || messageText.includes('top') || messageText.includes('best')) {
       hulu.callPopular(senderID, function(results) {
-        messenger.sendTextMessage(senderID, "Welcome to HuluBot! You can search for content on Hulu by saying show me Handmaids Tale or search for Seinfeld. Here are the most popular shows on Hulu.")
         let elements = messenger.parseAsElements(results)
+        messenger.sendTextMessage(senderID, "Welcome to HuluBot! You can search for content on Hulu by saying show me Handmaids Tale or search for Seinfeld. Here are the most popular shows on Hulu.")
         messenger.sendGenericMessage(senderID, elements)
       })
     } else if (messageText.includes("help") || messageText.includes("support") || messageText.includes("can you") || messageText.includes("how do")) {
       messenger.sendTextMessage(senderID, "You can say things like, search for Seinfeld, or tell me about The Handmaids Tale.")
     } else {
       messageText = messageText.replace("search for", "").replace("tell me about", "").replace("find", "").replace("season", "").replace("seasons", "")
-      hulu.search(messageText, function(results, speechOutput) {
-        let elements = messenger.parseAsElements(results)
+      hulu.search(messageText, function(show, speechOutput) {
+        if (show == undefined) {
+          messenger.sendTextMessage(senderID, "Hmm, I can't find that show.")
+          return
+        }
+        let element = messenger.templateForItem(show)
         messenger.sendTextMessage(senderID, speechOutput)
-        messenger.sendGenericMessage(senderID, elements)
+
+        messenger.sendGenericMessage(senderID, [element])
       })
     }
   }

@@ -90,22 +90,22 @@ exports.callMenu = function (menu) {
   });
 }
 
-function parseAsElements(info, senderID) {
-      var elements = Array()
+exports.parseAsElements = function (info) {
+      var elements = []
       //info.data.slice(0,5).forEach(function (item, index) { elements[index] = messenger.templateForItems(item) })
-      info.data.forEach(function (item, index) { elements[index] = messenger.templateForItems(item) })
+      info.data.forEach(function (item, index) { elements[index] = this.templateForItem(item.show) })
       return elements
 }
 
-exports.templateForItems = function (info) {
+exports.templateForItem = function (info) {
    var elements = {
-        title: info.show.name,
-        subtitle: info.show.description,
-        item_url: 'http://hulu.com/' + info.show.canonical_name,
-        image_url: info.show.key_art_url,
+        title: info.name,
+        subtitle: info.description,
+        item_url: 'http://hulu.com/' + info.canonical_name,
+        image_url: info.key_art_url,
         buttons: [{
           type: "web_url",
-          url: "http://hulu.com/" + info.show.canonical_name,
+          url: "http://hulu.com/" + info.canonical_name,
           title: "Watch Now!"
         },
         {
