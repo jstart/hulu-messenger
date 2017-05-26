@@ -23,7 +23,7 @@ exports.callPopular = function (callback) {
 }
 
 exports.search = function (query, callback) {
-  query = query.replace(/[^0-9a-zA-Z ]/g,å '');
+  query = query.replace(/[^0-9a-zA-Z ]/g, '');
   request('http://www.hulu.com/sapi/search/shows?q=' + query,
    function (error, response, body) {
     var parsed = JSON.parse(body);
