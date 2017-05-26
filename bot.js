@@ -5,6 +5,7 @@ const request = require('request');
 const path = require('path');
 const hulu = require('./hulu');
 const messenger = require('./messenger');
+const menu = require('./menu')
 
 var messengerButton = "<html><head><title>Facebook Messenger Bot</title></head><body><h1>Facebook Messenger Bot</h1>This is a bot based on Messenger Platform QuickStart. For more details, see their <a href=\"https://developers.facebook.com/docs/messenger-platform/guides/quick-start\">docs</a>.<script src=\"https://button.glitch.me/button.js\" data-style=\"glitch\"></script><div class=\"glitchButton\" style=\"position:fixed;top:20px;right:20px;\"></div></body></html>";
 
@@ -12,18 +13,15 @@ var messengerButton = "<html><head><title>Facebook Messenger Bot</title></head><
 let app = express();
 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({
-  extended: true
-}));
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Webhook validation
 app.get('/webhook', function(req, res) {
   if (req.query['hub.mode'] === 'subscribe' && req.query['hub.verify_token'] === process.env.VERIFY_TOKEN) {
-    console.log("Validating webhook");
     res.status(200).send(req.query['hub.challenge']);
   } else {
     console.error("Failed validation. Make sure the validation tokens match.");
-    res.sendStatus(403);          
+    res.sendStatus(403);
   }
 });
 
@@ -50,7 +48,7 @@ app.post('/webhook', function (req, res) {
         if (event.message) {
           receivedMessage(event);
         } else if (event.postback) {
-          receivedPostback(event);   
+          receivedPostback(event);
         } else if (event.read) {
           console.log("Read");
         } else if (event.delivery) {
@@ -61,10 +59,6 @@ app.post('/webhook', function (req, res) {
       });
     });
 
-    // Assume all went well.
-    // You must send back a 200, within 20 seconds, to let us know
-    // you've successfully received the callback. Otherwise, the request
-    // will time out and we will keep trying to resend.
     res.sendStatus(200);
   }
 });
@@ -88,12 +82,19 @@ function receivedMessage(event) {
     // If we receive a text message, check to see if it matches a keyword
     // and send back the template example. Otherwise, just echo the text we received.
     if (messageText.includes('popular') || messageText.includes('top') || messageText.includes('best')) {
-      hulu.callPopular(senderID);
+      hulu.callPopular(senderID, function() {
+        messenger.sendTextMessage(senderID, "Welcome to HuluBot! You can search for content on Hulu by saying show me Handmaids Tale or search for Seinfeld. Here are the most popular shows on Hulu.")
+        messenger.sendGenericMessage(senderID, elements)
+      }
     } else if (messageText.includes("help") || messageText.includes("support") || messageText.includes("can you") || messageText.includes("how do")) {
       messenger.sendTextMessage(senderID, "You can say things like, search for Seinfeld, or tell me about The Handmaids Tale.")
     } else {
       messageText = messageText.replace("search for", "").replace("tell me about", "").replace("find", "").replace("season", "").replace("seasons", "")
-      hulu.search(senderID, messageText)
+      hulu.search(messageText, function(results, speechOutput) {
+        let elements = messenger.parseAsElements(results)
+        messenger.sendTextMessage(senderID, speechOutput)
+        messenger.sendGenericMessage(senderID, elements)
+      })
     }
   }
 }
@@ -103,16 +104,11 @@ function receivedPostback(event) {
   var recipientID = event.recipient.id;
   var timeOfPostback = event.timestamp;
 
-  // The 'payload' param is a developer-defined field which is set in a postback 
-  // button for Structured Messages. 
+  // The 'payload' param is a developer-defined field which is set in a postback
+  // button for Structured Messages.
   var payload = event.postback.payload;
-
   console.log("Received postback for user %d and page %d with payload '%s' " + "at %d", senderID, recipientID, payload, timeOfPostback);
 
-  // When a postback is called, we'll send a message back to the sender to 
-  // let them know it was successful
-  // messenger.sendTextMessage(senderID, "Postback called " + payload);
-  
   switch (payload) {
     case 'POPULAR_PAYLOAD':
       hulu.callPopular(senderID);
@@ -121,7 +117,7 @@ function receivedPostback(event) {
   }
 }
 
-messenger.callMenu()
+messenger.callMenu(menu)
 
 // Set Express to listen out for HTTP requests
 var server = app.listen(process.env.PORT || 3000, function () {

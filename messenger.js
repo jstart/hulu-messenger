@@ -4,9 +4,7 @@ const request = require('request');
 // https://developers.facebook.com/docs/messenger-platform/send-api-reference/sender-actions
 exports.sendAction = function (recipientId, actionType) {
   var messageData = {
-    recipient: {
-      id: recipientId
-    },
+    recipient: { id: recipientId },
     sender_action: actionType
   };
 
@@ -15,12 +13,8 @@ exports.sendAction = function (recipientId, actionType) {
 
 exports.sendTextMessage = function (recipientId, messageText) {
   var messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      text: messageText
-    }
+    recipient: { id: recipientId },
+    message: { text: messageText }
   };
 
   exports.callSendAPI(messageData);
@@ -28,9 +22,7 @@ exports.sendTextMessage = function (recipientId, messageText) {
 
 exports.sendGenericMessage = function (recipientId, elements) {
   var messageData = {
-    recipient: {
-      id: recipientId
-    },
+    recipient: { id: recipientId },
     message: {
       attachment: {
         type: "template",
@@ -40,7 +32,7 @@ exports.sendGenericMessage = function (recipientId, elements) {
         }
       }
     }
-  };  
+  };
 
   exports.callSendAPI(messageData);
 }
@@ -53,16 +45,14 @@ exports.callSendAPI = function (messageData) {
     json: messageData
   }, function (error, response, body) {
     if (!error && response.statusCode == 200) {
-      var recipientId = body.recipient_id;
-      var messageId = body.message_id;
-
-      //console.log("Successfully sent generic message with id %s to recipient %s", messageId, recipientId);
+      // var recipientId = body.recipient_id;
+      // var messageId = body.message_id;
     } else {
       console.error("Unable to send message.");
       console.error(response);
       console.error(error);
     }
-  });  
+  });
 }
 
 // https://graph.facebook.com/v2.6/<USER_ID>?fields=first_name,last_name,profile_pic,locale,timezone,gender
@@ -79,78 +69,39 @@ exports.callProfileAPI = function (senderID) {
       console.error(response);
       console.error(error);
     }
-  });  
+  });
 }
 
-function templateForMenu(genre) {
-    var menuItem = {
-                "title":genre.name,
-                "type":"postback",
-                "payload":genre.id
-              }
-    return menuItem
-}
-
-exports.callMenu = function () {
-
-  var menuData = { 
-    "get_started": { "payload":"GET_STARTED_PAYLOAD" },
-    "greeting":[
-      {
-        "locale":"default",
-        "text":"Discover all the great content on Hulu! You can say things like, search for Seinfeld, or tell me about The Handmaids Tale."
-      }
-    ],
-    "persistent_menu":[
-      {
-        "locale":"default",
-        "call_to_actions":[
-          {
-            "title":"Browse Genres",
-            "type":"web_url",
-            "url":"https://hulu.com/genres",
-            "webview_height_ratio":"full"
-          },
-          {
-            "title":"Movies",
-            "type":"web_url",
-            "url":"https://hulu.com/movies",
-            "webview_height_ratio":"full"
-          },
-          {
-            "title":"Hulu Originals",
-            "type":"web_url",
-            "url":"https://hulu.com/originals",
-            "webview_height_ratio":"full"
-          }
-        ]
-      }
-    ]
-  }
+exports.callMenu = function (menu) {
   request({
     uri: 'https://graph.facebook.com/v2.6/me/messenger_profile',
     qs: { access_token: process.env.PAGE_ACCESS_TOKEN },
     method: 'POST',
-    json: menuData
+    json: menu
   }, function (error, response, body) {
     if (!error && response.statusCode == 200) {
-      var recipientId = body.recipient_id;
-      var messageId = body.message_id;
-
-      //console.log("Successfully sent generic message with id %s to recipient %s", messageId, recipientId);
+      // var recipientId = body.recipient_id;
+      // var messageId = body.message_id;
     } else {
       console.error("Unable to send message.");
       console.error(response);
       console.error(error);
     }
-  });  
+  });
+}
+
+function parseAsElements(info, senderID) {
+      var elements = Array()
+      //info.data.slice(0,5).forEach(function (item, index) { elements[index] = messenger.templateForItems(item) })
+      info.data.forEach(function (item, index) { elements[index] = messenger.templateForItems(item) })
+      return elements
 }
 
 exports.templateForItems = function (info) {
    var elements = {
         title: info.show.name,
         subtitle: info.show.description,
-        item_url: 'http://hulu.com/' + info.show.canonical_name,               
+        item_url: 'http://hulu.com/' + info.show.canonical_name,
         image_url: info.show.key_art_url,
         buttons: [{
           type: "web_url",

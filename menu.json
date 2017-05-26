@@ -1,0 +1,36 @@
+{
+  "get_started": {
+    "payload": "GET_STARTED_PAYLOAD"
+  },
+  "greeting": [
+    {
+      "locale": "default",
+      "text": "Discover all the great content on Hulu! You can say things like, search for Seinfeld, or tell me about The Handmaids Tale."
+    }
+  ],
+  "persistent_menu": [
+    {
+      "locale": "default",
+      "call_to_actions": [
+        {
+          "title": "Browse Genres",
+          "type": "web_url",
+          "url": "https://hulu.com/genres",
+          "webview_height_ratio": "full"
+        },
+        {
+          "title": "Movies",
+          "type": "web_url",
+          "url": "https://hulu.com/movies",
+          "webview_height_ratio": "full"
+        },
+        {
+          "title": "Hulu Originals",
+          "type": "web_url",
+          "url": "https://hulu.com/originals",
+          "webview_height_ratio": "full"
+        }
+      ]
+    }
+  ]
+}
