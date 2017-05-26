@@ -93,31 +93,8 @@ exports.callMenu = function (menu) {
 exports.parseAsElements = function (info) {
       var elements = []
       //info.data.slice(0,5).forEach(function (item, index) { elements[index] = messenger.templateForItem(item) })
-      info.data.forEach(function (item, index) { elements[index] = templateForItem(item.show) })
+      info.data.forEach(function (item, index) { elements[index] = exports.templateForItem(item.show) })
       return elements
-}
-
-function templateForItem(info) {
-   var element = {
-        title: info.name,
-        subtitle: info.description,
-        item_url: 'http://hulu.com/' + info.canonical_name,
-        image_url: info.key_art_url,
-        buttons: [{
-          type: "web_url",
-          url: "http://hulu.com/" + info.canonical_name,
-          title: "Watch Now!"
-        },
-        {
-        "type":"element_share"
-        }]
-     // , { 
-     //      type: "postback",
-     //      title: "More like this",
-     //      payload: info.show.id,
-     //    }
-      }
-   return element
 }
 
 exports.templateForItem = function (info) {
